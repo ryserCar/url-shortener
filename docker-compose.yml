@@ -1,0 +1,41 @@
+version: '3'
+services:
+  mysql:
+    container_name: url-shortener-mysql
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_USER: user
+      MYSQL_DATABASE: url_shortener
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    networks:
+      - my-network
+    volumes:
+      - ./sql-scripts:/docker-entrypoint-initdb.d
+
+  app:
+    container_name: url-shortener
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: url-shortener-mysql
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    networks:
+      - my-network
+
+networks:
+  my-network:
